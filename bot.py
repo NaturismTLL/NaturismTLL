@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import os
+from typing import Optional
 
 # Set up bot with command prefix
 intents = discord.Intents.default()
@@ -64,7 +65,7 @@ async def serverinfo(ctx):
     await ctx.send(embed=embed)
 
 @bot.command(name='userinfo', help='Get user information')
-async def userinfo(ctx, member: discord.Member = None):
+async def userinfo(ctx, member: Optional[discord.Member] = None):
     """Display information about a user."""
     member = member or ctx.author
     
@@ -77,7 +78,9 @@ async def userinfo(ctx, member: discord.Member = None):
     embed.add_field(name="ID", value=member.id, inline=False)
     embed.add_field(name="Nickname", value=member.nick or "None", inline=True)
     embed.add_field(name="Status", value=str(member.status).title(), inline=True)
-    embed.add_field(name="Joined Server", value=member.joined_at.strftime("%Y-%m-%d"), inline=False)
+    
+    joined_at = member.joined_at.strftime("%Y-%m-%d") if member.joined_at else "Unknown"
+    embed.add_field(name="Joined Server", value=joined_at, inline=False)
     embed.add_field(name="Account Created", value=member.created_at.strftime("%Y-%m-%d"), inline=False)
     
     roles = [role.mention for role in member.roles if role.name != "@everyone"]

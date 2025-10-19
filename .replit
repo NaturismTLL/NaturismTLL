@@ -16,27 +16,26 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Server"
+args = "Discord Bot"
 
 [[workflows.workflow]]
-name = "Server"
+name = "Discord Bot"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python -m http.server 5000 --bind 0.0.0.0"
-waitForPort = 5000
+args = "python bot.py"
 
 [workflows.workflow.metadata]
-outputType = "webview"
+outputType = "console"
 
 [[ports]]
 localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 36531
-externalPort = 3000
+localPort = 45889
+externalPort = 3001
 
 [deployment]
 deploymentTarget = "autoscale"
