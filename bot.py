@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
+from discord.ui import Button, View
 import os
 from typing import Optional
 
-# Set up bot with command prefix
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
@@ -11,41 +11,71 @@ intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+INSTAGRAM_USERNAME = os.getenv('INSTAGRAM_USERNAME', 'your_instagram')
+TELEGRAM_USERNAME = os.getenv('TELEGRAM_USERNAME', 'your_telegram')
+
 @bot.event
 async def on_ready():
-    """Called when the bot is ready and connected."""
     print(f'{bot.user} has connected to Discord!')
     print(f'Bot is in {len(bot.guilds)} guilds')
-    
-    # Set bot status
     await bot.change_presence(
-        activity=discord.Game(name="Type !help for commands")
+        activity=discord.Game(name="Type !help for commands | !profile")
     )
 
 @bot.event
 async def on_message(message):
-    """Called when a message is sent in a channel the bot can see."""
-    # Ignore messages from the bot itself
     if message.author == bot.user:
         return
-    
-    # Process commands
     await bot.process_commands(message)
+
+@bot.command(name='profile', help='View Mahdi\'s profile with social media links')
+async def profile(ctx):
+    embed = discord.Embed(
+        title="👤 Mahdi's Profile",
+        description="You're viewing Mahdi's profile! Connect with me on social media:",
+        color=discord.Color.purple()
+    )
+    
+    embed.add_field(
+        name="📱 Social Media",
+        value="Click the buttons below to connect with me on Instagram and Telegram!",
+        inline=False
+    )
+    
+    embed.set_footer(text="Thanks for checking out my profile! 💜")
+    
+    view = View()
+    
+    instagram_button = Button(
+        label="Instagram",
+        style=discord.ButtonStyle.link,
+        url=f"https://instagram.com/{INSTAGRAM_USERNAME}",
+        emoji="📷"
+    )
+    
+    telegram_button = Button(
+        label="Telegram",
+        style=discord.ButtonStyle.link,
+        url=f"https://t.me/{TELEGRAM_USERNAME}",
+        emoji="✈️"
+    )
+    
+    view.add_item(instagram_button)
+    view.add_item(telegram_button)
+    
+    await ctx.send(embed=embed, view=view)
 
 @bot.command(name='hello', help='Says hello!')
 async def hello(ctx):
-    """Simple hello command."""
     await ctx.send(f'Hello {ctx.author.mention}! 👋')
 
 @bot.command(name='ping', help='Check bot latency')
 async def ping(ctx):
-    """Returns the bot's latency."""
     latency = round(bot.latency * 1000)
     await ctx.send(f'🏓 Pong! Latency: {latency}ms')
 
 @bot.command(name='serverinfo', help='Get server information')
 async def serverinfo(ctx):
-    """Display information about the server."""
     guild = ctx.guild
     
     embed = discord.Embed(
@@ -66,7 +96,6 @@ async def serverinfo(ctx):
 
 @bot.command(name='userinfo', help='Get user information')
 async def userinfo(ctx, member: Optional[discord.Member] = None):
-    """Display information about a user."""
     member = member or ctx.author
     
     embed = discord.Embed(
@@ -91,7 +120,6 @@ async def userinfo(ctx, member: Optional[discord.Member] = None):
 
 @bot.event
 async def on_command_error(ctx, error):
-    """Handle command errors."""
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("❌ Command not found. Type !help to see available commands.")
     elif isinstance(error, commands.MissingRequiredArgument):
@@ -102,7 +130,6 @@ async def on_command_error(ctx, error):
         print(f'Error: {error}')
         await ctx.send("❌ An error occurred while processing the command.")
 
-# Run the bot
 if __name__ == '__main__':
     token = os.getenv('DISCORD_BOT_TOKEN')
     if not token:
